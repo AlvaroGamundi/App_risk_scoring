@@ -4,3 +4,4 @@ scikit_learn==1.0.2
 streamlit==1.7.0
 streamlit_echarts==0.4.0
 protobuf==3.20.3
+altair==5.5.0
