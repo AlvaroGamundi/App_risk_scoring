@@ -17,25 +17,14 @@ from sklearn.compose import make_column_transformer
 from sklearn.pipeline import make_pipeline
 
 
-#4.FUNCIONES DE SOPORTE
-def calidad_datos(temp):
-    temp['antigüedad_empleo'] = temp['antigüedad_empleo'].fillna('desconocido')
-    for column in temp.select_dtypes('number').columns:
-        temp[column] = temp[column].fillna(0)
-    return temp
 
-def creacion_variables(df):
-    temp = df.copy()
-    temp.vivienda = temp.vivienda.replace(['ANY','NONE','OTHER'],'MORTGAGE')
-    temp.finalidad = temp.finalidad.replace(['wedding','educational','renewable_energy'],'otros')
-    return(temp)
 
 
 def ejecutar_modelos(df):
     #5.CALIDAD Y CREACION DE VARIABLES
-    x_pd = creacion_variables(calidad_datos(df))
-    x_ead = creacion_variables(calidad_datos(df))
-    x_lgd = creacion_variables(calidad_datos(df))
+    x_pd = df.copy()
+    x_ead = df.copy()
+    x_lgd = df.copy()
 
 
     #6.CARGA PIPES DE EJECUCION

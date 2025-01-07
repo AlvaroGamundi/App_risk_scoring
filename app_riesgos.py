@@ -1,11 +1,11 @@
-from codigo_de_ejecucion import *
+from codigo_de_ejecucion_mio import *
 import streamlit as st
 from streamlit_echarts import st_echarts
 
 #CONFIGURACION DE LA PÁGINA
 st.set_page_config(
-     page_title = 'DS4B Risk Score Analyzer',
-     page_icon = 'DS4B_Logo_Blanco_Vertical_FB.png',
+     page_title = 'Bank Loan Risk Score Analyzer',
+     page_icon = 'risk_score.jpg',
      layout = 'wide')
 
 #SIDEBAR
@@ -13,14 +13,14 @@ with st.sidebar:
     st.image('risk_score.jpg')
 
     #INPUTS DE LA APLICACION
-    principal = st.number_input('Importe Solicitado', 500, 50000)
-    finalidad = st.selectbox('Finalidad Préstamo', ['debt_consolidation','credit_card','home_improvement','other'])
-    num_cuotas = st.radio('Número Cuotas', ['36 months','60 months'])
-    ingresos = st.slider('Ingresos anuales', 20000, 300000)
+    principal = st.number_input('Requested Amount', 500, 50000)
+    finalidad = st.selectbox('Loan Purpose', ['debt_consolidation','credit_card','home_improvement','other'])
+    num_cuotas = st.radio('Number of Installments', ['36 months','60 months'])
+    ingresos = st.slider('Annual Income', 20000, 300000)
 
     #DATOS CONOCIDOS (fijadas como datos estaticos por simplicidad)
     ingresos_verificados = 'Verified'
-    antigüedad_empleo = '10+ years'
+    antiguedad_empleo = '10+ years'
     rating = 'B'
     dti = 28
     num_lineas_credito = 3
@@ -29,12 +29,15 @@ with st.sidebar:
     imp_cuota = 500
     num_derogatorios = 0
     vivienda = 'MORTGAGE'
+    num_hipotecas=1
+    porc_tarjetas_75p=41
+    num_cancelaciones_12meses=0
 
 
 
 
 #MAIN
-st.title('DS4B RISK SCORE ANALYZER')
+st.title('BANK LOAN RISK SCORE ANALYZER')
 
 
 #CALCULAR
@@ -44,7 +47,7 @@ registro = pd.DataFrame({'ingresos_verificados':ingresos_verificados,
                          'vivienda':vivienda,
                          'finalidad':finalidad,
                          'num_cuotas':num_cuotas,
-                         'antigüedad_empleo':antigüedad_empleo,
+                         'antiguedad_empleo':antiguedad_empleo,
                          'rating':rating,
                          'ingresos':ingresos,
                          'dti':dti,
@@ -53,13 +56,17 @@ registro = pd.DataFrame({'ingresos_verificados':ingresos_verificados,
                          'principal':principal,
                          'tipo_interes':tipo_interes,
                          'imp_cuota':imp_cuota,
-                         'num_derogatorios':num_derogatorios}
+                         'num_derogatorios':num_derogatorios,
+                         'num_hipotecas':num_hipotecas,
+                         'porc_tarjetas_75p':porc_tarjetas_75p,
+                         'num_cancelaciones_12meses':num_cancelaciones_12meses}
                         ,index=[0])
 
 
 
 #CALCULAR RIESGO
-if st.sidebar.button('CALCULAR RIESGO'):
+if st.sidebar.button('CALCULATE RISK'):
+    st.write('Designed and Powered by Álvaro Gamundi')
     #Ejecutar el scoring
     EL = ejecutar_modelos(registro)
 
@@ -136,13 +143,19 @@ if st.sidebar.button('CALCULAR RIESGO'):
         st_echarts(options=lgd_options, width="110%", key=2)
 
     #Prescripcion
-    col1,col2 = st.columns(2)
+    col1,col2,col3 = st.columns(3)
     with col1:
-        st.write('La pérdida esperada es de (Euros):')
-        st.metric(label="PÉRDIDA ESPERADA", value = kpi_el)
+        st.write('The expected loss is:')
+        st.metric(label="EXPECTED LOSS", value =f"{ kpi_el} €")
     with col2:
-        st.write('Se recomienda un extratipo de (Euros):')
-        st.metric(label="COMISIÓN A APLICAR", value = kpi_el * 3) #Metido en estático por simplicidad
-
+        st.write('Recommended additional charge:')
+        st.metric(label="COMMISSION TO APPLY", value =f"{ kpi_el * 3} €") #Metido en estático por simplicidad
+    with col3:
+        st.write('The interest to apply is:')
+        st.metric(label="INTEREST TO APPLY", value=f"{round(kpi_el * 3 / principal * 100, 2)} %")
+    
 else:
-    st.write('DEFINE LOS PARÁMETROS DEL PRÉSTAMO Y HAZ CLICK EN CALCULAR RIESGO')
+    st.write('DEFINE THE LOAN PARAMETERS AND CLICK ON CALCULATE RISK')
+    st.write('Designed and Powered by Álvaro Gamundi')
+    
+    
